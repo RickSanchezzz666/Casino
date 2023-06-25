@@ -21,10 +21,17 @@ app.use(cors())
 
 const setup = async () => {
 
-    // app.use(express.static('build'));
-    // app.get('*', (req, res) => {
-    //     res.sendFile(path.join(__dirname, "./build/index.html"))
-    // })
+    const buildPath = path.join(__dirname, "./front/build");
+
+    app.use(express.static(buildPath));
+
+    app.get('*', (req, res) => {
+        res.sendFile(path.join(buildPath, "index.html"))
+    })
+
+    app.get('*.js', (req, res) => {
+        res.set('Content-Type', 'application/javascript');
+      });
 
     app.use(gameApi.router);
 
