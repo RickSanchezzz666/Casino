@@ -16,12 +16,11 @@ function MainPage() {
     let [bombsNumber, setBombsNumber] = useState("");
     let [gameId, setGameId] = useState("");
     let [gameInfo, setGameInfo] = useState("")
-    let [activeGame, setActiveGame] = useState(false)
+    let [gameActive, setGameActive] = useState(false)
     let tilesWon = [];
-    let tilesOpened = [];
 
     async function createGame() {
-        if(activeGame === true) {
+        if(gameActive === true) {
             console.error('You already have your game started!');
             return;
         }
@@ -33,13 +32,13 @@ function MainPage() {
 
         tilesWon = [];
 
+        setGameActive(true)
+
         for (let i = 0; i <= 24; i++) {
             let tile = document.getElementById(`tile${i}`);
             tile.className = 'tile';
             tile.disabled = false;
         }
-
-        setActiveGame(false)
 
         document.getElementById('winner-text').className = 'display-none';
 
@@ -96,8 +95,6 @@ function MainPage() {
     async function PlayGame(tileNumber) {
         let tile = document.getElementById(`tile${tileNumber}`);
 
-        setActiveGame(true);
-
         try {
             const res = await axios.get("/play", {
                 params: {
@@ -114,7 +111,7 @@ function MainPage() {
             }
             else {
                 console.log(`Tile ${tileNumber} has a bomb. You lost!`)
-                setActiveGame(false);
+                setGameActive(false)
                 for (let i = 0; i <= 24; i++) {
                     let tiles = document.getElementById(`tile${i}`);
                     tiles.disabled = true;
@@ -136,6 +133,7 @@ function MainPage() {
 
             if(25 - bombsNumber === tilesWon.length) {
                 console.log(`You opened every correct tile. You won!`)
+                setGameActive(false);
                 for (let i = 0; i <= 24; i++) {
                     let tiles = document.getElementById(`tile${i}`);
                     tiles.disabled = true;
