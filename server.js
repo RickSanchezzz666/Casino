@@ -14,12 +14,15 @@ const Mongo = require('./setup/mongoose')
 const app = express();
 
 const gameApi = require('./api/create-game')
+const playApi = require('./api/play-game')
 
 app.use(bodyParser.json());
 app.use(cors())
 
-
 const setup = async () => {
+
+    app.use(gameApi.router);
+    app.use(playApi.router);
 
     const buildPath = path.join(__dirname, "./front/build");
 
@@ -28,12 +31,6 @@ const setup = async () => {
     app.get('*', (req, res) => {
         res.sendFile(path.join(buildPath, "index.html"))
     })
-
-    app.get('*.js', (req, res) => {
-        res.set('Content-Type', 'application/javascript');
-      });
-
-    app.use(gameApi.router);
 
     await Mongo.setupDb(process.env.MONGO_DB_URI);
 
