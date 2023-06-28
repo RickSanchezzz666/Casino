@@ -69,6 +69,7 @@ function MainPage() {
                 tile.className = 'tile-won';
                 tile.disabled = true;
             } else {
+                setActiveGame(res.data.active)
                 if (res.data.state === "victory") {
                     console.log(`You opened every correct tile. You won!`)
                     for (let i = 0; i <= 24; i++) {
