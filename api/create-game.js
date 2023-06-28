@@ -4,9 +4,9 @@ const { Router } = require('express')
 const router = Router();
 
 router.post('/create', async (req, res) => {
-    const { createDate, createdBy, items } = req.body
+    const { createDate, createdBy, bombsNumber } = req.body
 
-    const game = new Game({ createDate, createdBy, items })
+    const game = new Game({ createDate, createdBy, bombsNumber, opened: [], bombs: [], crystals: [], active: 1, state: "game in progress..." })
 
     try {
         const doc = await game.save();

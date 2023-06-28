@@ -15,12 +15,10 @@ function MainPage() {
 
     let [bombsNumber, setBombsNumber] = useState("");
     let [gameId, setGameId] = useState("");
-    let [gameInfo, setGameInfo] = useState("")
-    let [gameActive, setGameActive] = useState(false)
-    let tilesWon = [];
+    let [activeGame, setActiveGame] = useState("")
 
     async function createGame() {
-        if(gameActive === true) {
+        if (activeGame === 1) {
             console.error('You already have your game started!');
             return;
         }
@@ -30,9 +28,6 @@ function MainPage() {
             return;
         }
 
-        tilesWon = [];
-
-        setGameActive(true)
 
         for (let i = 0; i <= 24; i++) {
             let tile = document.getElementById(`tile${i}`);
@@ -44,48 +39,15 @@ function MainPage() {
 
         const createdBy = 'Roman Lapiyk';
 
-        let bombs = [];
-
-        let slots = [];
-
-        for (let i = 1; i <= 25; i++) {
-            let newItem = {
-                bomb: false
-            };
-
-            slots.push(newItem);
-        }
-
-        function randomIntFromInterval(min, max) {
-            return Math.floor(Math.random() * (max - min + 1) + min)
-        }
-
-        for (let i = 1; i <= bombsNumber; i++) {
-            const random = randomIntFromInterval(0, 24)
-            bombs.push(random);
-        }
-
-        for (let i = 0; i < bombsNumber; i++) {
-            let tempBomb = 0;
-            tempBomb = bombs[i];
-            if (slots[tempBomb].bomb === true) {
-                const random = randomIntFromInterval(0, 24)
-                bombs.push(random);
-                bombsNumber++;
-            } else {
-                slots[tempBomb].bomb = true;
-            }
-        }
-
         try {
             const res = await axios.post("/create", {
                 createDate: moment(Date.now()).format(),
                 createdBy,
-                items: slots
+                bombsNumber
             })
 
             setGameId(res.data._id)
-            setGameInfo(res.data)
+            setActiveGame(res.data.active);
             return;
         } catch (error) {
             return [];
@@ -96,61 +58,46 @@ function MainPage() {
         let tile = document.getElementById(`tile${tileNumber}`);
 
         try {
-            const res = await axios.get("/play", {
-                params: {
-                    gameId,
-                    tileNumber
-                }
+            const res = await axios.post("/play", {
+                gameId,
+                tileNumber,
+                bombsNumber
             })
 
-            if (res.data === false) {
+            if (res.data === true) {
                 console.log(`Tile ${tileNumber} is clear!`)
-                tilesWon.push(tileNumber);
                 tile.className = 'tile-won';
                 tile.disabled = true;
-            }
-            else {
-                console.log(`Tile ${tileNumber} has a bomb. You lost!`)
-                setGameActive(false)
-                for (let i = 0; i <= 24; i++) {
-                    let tiles = document.getElementById(`tile${i}`);
-                    tiles.disabled = true;
-                }
-                for(let i = 0; i <= 24; i++) {
-                    let tileLost = document.getElementById(`tile${i}`);
-                    if(gameInfo.items[i].bomb === false) {
-                        tileLost.className = 'tile-win';
-                    } else if(gameInfo.items[i].bomb === true) {
-                        tileLost.className = 'tile-lost';
+            } else {
+                if (res.data.state === "victory") {
+                    console.log(`You opened every correct tile. You won!`)
+                    for (let i = 0; i <= 24; i++) {
+                        let tiles = document.getElementById(`tile${i}`);
+                        tiles.disabled = true;
                     }
+                    document.getElementById('winner-text').className = '';
+                } else {
+                    console.log(`Tile ${tileNumber} has a bomb. You lost!`)
                 }
-                tile.className = 'tile-loose';
-                tilesWon.map((tile) => {
-                    let tileWon = document.getElementById(`tile${tile}`);
-                    tileWon.className = 'tile-won';
-                })
-            }
 
-            if(25 - bombsNumber === tilesWon.length) {
-                console.log(`You opened every correct tile. You won!`)
-                setGameActive(false);
                 for (let i = 0; i <= 24; i++) {
                     let tiles = document.getElementById(`tile${i}`);
                     tiles.disabled = true;
                 }
-                for(let i = 0; i <= 24; i++) {
-                    let tileLost = document.getElementById(`tile${i}`);
-                    if(gameInfo.items[i].bomb === false) {
-                        tileLost.className = 'tile-win';
-                    } else if(gameInfo.items[i].bomb === true) {
-                        tileLost.className = 'tile-lost';
-                    }
-                }
-                tilesWon.map((tile) => {
+
+                res.data.crystals.map((crystal) => {
+                    let tileWin = document.getElementById(`tile${crystal}`);
+                    tileWin.className = 'tile-win';
+                })
+                res.data.bombs.map((bomb) => {
+                    let tileLost = document.getElementById(`tile${bomb}`);
+                    tileLost.className = 'tile-lost';
+                })
+                tile.className = 'tile-loose';
+                res.data.opened.map((tile) => {
                     let tileWon = document.getElementById(`tile${tile}`);
                     tileWon.className = 'tile-won';
                 })
-                document.getElementById('winner-text').className = '';
             }
 
             return res.data;
