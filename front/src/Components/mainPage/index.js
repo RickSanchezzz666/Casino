@@ -16,6 +16,7 @@ function MainPage() {
     let [bombsNumber, setBombsNumber] = useState("");
     let [gameId, setGameId] = useState("");
     let [activeGame, setActiveGame] = useState("")
+    let [bet, setBet] = useState("")
 
     async function createGame() {
         if (activeGame === 1) {
@@ -23,11 +24,15 @@ function MainPage() {
             return;
         }
 
+        if(bet === '') {
+            console.log('Firstly enter the bet!')
+            return;
+        }
+
         if (bombsNumber === "") {
             console.log('Firstly choose bombs number!')
             return;
         }
-
 
         for (let i = 0; i <= 24; i++) {
             let tile = document.getElementById(`tile${i}`);
@@ -43,7 +48,8 @@ function MainPage() {
             const res = await axios.post("/create", {
                 createDate: moment(Date.now()).format(),
                 createdBy,
-                bombsNumber
+                bombsNumber,
+                bet: (bet * 100)
             })
 
             setGameId(res.data._id)
@@ -189,6 +195,7 @@ function MainPage() {
                     }} className="tile"></button>
                 </div>
                 <div className="buttons-wrapper">
+                    <input value={"0.00"} onChange={(event) => setBet(event.target.value)} className="bet-input"></input>
                     <select className="choose-bombs-number" value={bombsNumber} onChange={(event) => setBombsNumber(event.target.value)} >
                         <option value="">-</option>
                         <option value="2">2</option>

@@ -100,10 +100,11 @@
 .buttons-wrapper {
     display: grid;
     justify-self: center;
-    grid-template-columns: 2fr 2fr;
+    grid-template-columns: 3fr 2fr 3fr;
     grid-column-gap: 10px;
     height: 40px;
     margin-top: 15px;
+    width: 350px;
 }
 
 

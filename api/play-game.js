@@ -20,67 +20,27 @@ router.post('/play', async (req, res) => {
         res.status(500).send();
     }
 
-    let rangeBoost = 1;
+    let inputMin = 2;
+    let inputMax = 24;
 
-    let boost = 1;
-    let multiply = 1.25;
-
-    if (bombsNumber >= 2 && bombsNumber <= 3) {
-        boost = 1.30;
-        rangeBoost = 1.025
-        if (openedTiles >= 3 && openedTiles <= 8) {
-            multiply = 2.5;
-        } else if (openedTiles >= 9 && openedTiles <= 16) {
-            multiply = 3;
-        } else if (openedTiles >= 16 && openedTiles <= 22) {
-            multiply = 5;
-        }
-    }
-    else if (bombsNumber >= 8 && bombsNumber <= 13) {
-        boost = 1.4;
-        rangeBoost = 1.035
-        if (openedTiles >= 3 && openedTiles <= 8) {
-            multiply = 3;
-        } else if (openedTiles >= 9 && openedTiles <= 16) {
-            multiply = 4;
-        } else if (openedTiles >= 16 && openedTiles <= 22) {
-            multiply = 5;
-        }
-    } else if (bombsNumber >= 8 && bombsNumber <= 13) {
-        boost = 1.75;
-        rangeBoost = 1.05
-        if (openedTiles >= 2 && openedTiles <= 7) {
-            multiply = 5;
-        } else if (openedTiles >= 8 && openedTiles <= 12) {
-            multiply = 8;
-        } else if (openedTiles >= 13 && openedTiles <= 16) {
-            multiply = 12;
-        }
-    } else if (bombsNumber >= 14 && bombsNumber <= 19) {
-        boost = 2.
-        rangeBoost = 1.075
-        if (openedTiles >= 0 && openedTiles <= 2) {
-            multiply = 7;
-        } else if (openedTiles >= 3 && openedTiles <= 4) {
-            multiply = 8;
-        } else if (openedTiles >= 5 && openedTiles <= 9) {
-            multiply = 9;
-        }
-    } else if (bombsNumber >= 20 && bombsNumber <= 23) {
-        boost = 2.25;
-        rangeBoost = 1.075
-        if (openedTiles === 1) {
-            multiply = 1;
-        } else if (openedTiles === 2) {
-            multiply = 4.5;
-        } else if (openedTiles === 3) {
-            multiply = 7;
-        }
+    function scaleValue(inputValue, inputMin, inputMax, outputMin, outputMax) {
+        return ((inputValue - inputMin) * (outputMax - outputMin) / (inputMax - inputMin)) + outputMin;
     }
 
-    let minRange = (30000 + (bombsNumber * 15745) * 1.16465) * rangeBoost
+    let outputMinBoost = 1.25;
+    let outputMaxBoost = 2.25;
+    let outputMinRange = 1.001;
+    let outputMaxRange = 1.075;
 
-    let maxRange = (999999 - (30000 + (bombsNumber * 15745) * 1.16465))
+    let boost = scaleValue(bombsNumber, inputMin, inputMax, outputMinBoost, outputMaxBoost);
+
+    let rangeBoost = scaleValue(openedTiles, inputMin, inputMax, outputMinRange, outputMaxRange)
+
+    let multiply = (boost + rangeBoost) / 2;
+
+    let minRange = (22500 + (bombsNumber * 15745) * 1.16465) * rangeBoost
+
+    let maxRange = (999999 - (22500 + (bombsNumber * 15745) * 1.16465))
 
     let chanceBoost = (2500 * (multiply * openedTiles) * 0.389) * boost;
 
@@ -185,7 +145,7 @@ router.post('/play', async (req, res) => {
                     { _id: gameId },
                     {
                         $push: { bombs: bombsTiles, crystals: crystalTiles },
-                        $set: { active: 0, state: "victory" }
+                        $set: { active: 0, state: "victory", profit: 5, multiplier: 2 }
                     },
                     { returnOriginal: false }
                 )

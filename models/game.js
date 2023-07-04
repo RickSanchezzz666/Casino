@@ -7,8 +7,11 @@ const schema = new Schema({
     opened: [{ type: Number }],
     bombs: [{ type: Number }],
     crystals: [{ type: Number }],
-    active: { type: Number, required: true},
-    state: {type: String, required: true}
+    active: { type: Number, required: true },
+    state: { type: String, required: true },
+    bet: { type: Number, required: true },
+    profit: { type: Number, required: true },
+    multiplier: { type: Number, required: true }
 })
 
 const Game = new model('game', schema, 'game');
